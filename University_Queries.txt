@@ -1,0 +1,109 @@
+
+/*Query 1:Find the names of the instructors(other than computer science) whose salary is greater than at least one instructor in the computer science department*/
+
+mysql> select name from instructor where salary > any(select name from instructor where dept_name='Computer Science') and dept_name!='Computer Science';
++----------+
+| name     |
++----------+
+| Mozart   |
+| Einstein |
++----------+
+2 rows in set (0.01 sec)
+
+/*Query 2:Increase the salary of instructors by 3% whose salary is less than average salary of their departments.*/
+
+mysql> select 1.03*salary,name from instructor i where salary<(select avg(salary) from instructor i1 group by dept_name having i.dept_name=i1.dept_name);
++-------------+-------+
+| 1.03*salary | name  |
++-------------+-------+
+|    77250.00 | Korth |
++-------------+-------+
+1 row in set (0.00 sec)
+
+
+/*Query 3:Display the course titles and instructor names taken by the student named ‘kshitiz’*/
+
+mysql> select i.name,c.title from student s, instructor i, course c, takes t, teaches te where s.name='kshitiz' and s.ID=t.ID and t.course_id=c.course_id and t.course_id=te.course_id and te.ID=i.ID;
++----------+-------+
+| name     | title |
++----------+-------+
+| Einstein | DBMS  |
+| Mozart   | PS    |
++----------+-------+
+2 rows in set (0.00 sec)
+
+/*Query 4:Display the course titles and department name conducted in building ‘AB-II’ class room ‘112’*/
+
+mysql> select c.title,c.dept_name from course c, section s where s.building='AB-II' and s.room_number=112 and s.course_id=c.course_id;
++-------+------------------+
+| title | dept_name        |
++-------+------------------+
+| DBMS  | Computer Science |
+| PS    | Maths            |
++-------+------------------+
+2 rows in set (0.00 sec)
+
+/*Query 5:Display the student name who have taken all the courses in Computer Science department*/
+
+mysql> select name from student where ID in(select ID from takes where course_id in (select course_id from course where dept_name='Computer Science') group by ID having count(*) = (select count(*) from course group by dept_name having dept_name ='Computer Science'));
++------+
+| name |
++------+
+| Mike |
++------+
+1 row in set (0.00 sec)
+
+/*Query 6:Display the highest credit subjects in each year-semester*/
+
+ select max(c.credits),c.title,s.year,s.semester from course c,section s where c.course_id=s.course_id group by year,semester;
++----------------+-----------+------+----------+
+| max(c.credits) | title     | year | semester |
++----------------+-----------+------+----------+
+|              4 | DBMS      | E2   |        1 |
+|              4 | OS        | E3   |        1 |
+|              3 | Physics-I | P1   |        1 |
++----------------+-----------+------+----------+
+3 rows in set (0.00 sec)
+
+
+/*Query 7:Display ids and titles of courses which are offered in computer science department in either semester1 or semester 2 of ‘E2’*/
+
+mysql> select c.course_id,c.title from section s,course c where s.course_id=c.course_id and dept_name='Computer Science' and s.year='E2';
++-----------+-------+
+| course_id | title |
++-----------+-------+
+| CS-2201   | DBMS  |
++-----------+-------+
+1 row in set (0.00 sec)
+
+/*Query 8:Find the number of students who have taken course sections taught by instructor ‘Korth’*/
+select count(*) from student s,takes t,teaches te,course c,instructor i where s.ID=t.ID and t.course_id=te.course_id and te.ID=i.ID and i.name='Korth';
++----------+
+| count(*) |
++----------+
+|        0 |
++----------+
+1 row in set (0.00 sec)
+
+
+/*Query 9:Display the details of the students  who got ‘A’ grade in all the courses he has taken*/
+
+mysql> select t.ID from takes t group by ID having count(*) = all(select count(*) from takes t2 where t.ID=t2.ID group by grade having grade='A');
++------+
+| ID   |
++------+
+| 1001 |
++------+
+1 row in set (0.00 sec)
+
+ select s.name from student s,takes t where t.grade='A' and t.ID=s.ID group by t.ID having count(*)=(select count(*) from takes t2 where t.id=t2.id group by id);
++------+
+| name |
++------+
+| Mike |
++------+
+
+
+
+
+

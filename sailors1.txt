@@ -1,0 +1,31 @@
+--------------------sailors---------------------
+
+1.Find names of sailors who have reserved all boats:
+
+Query:
+ select sname from sailors where sid in(select sid from reserves group by sid having count(bid)=(select count(bid) from boats));
++--------+
+| sname  |
++--------+
+| Dustin |
++--------+
+
+2.For each red boat ,find no.of reservations for this boat.
+
+Query:
+
+select b.bid,count(r.sid) from boats b,reserves r where b.color='red' and b.bid=r.bid group by b.bid;
++------+--------------+
+| bid  | count(r.sid) |
++------+--------------+
+|  104 |            2 |
+|  102 |            3 |
++------+--------------+
+2 rows in set (0.00 sec)
+
+3.Find those ratings for which avg age of sailors is minimum over all ratings.
+
+Query:
+
+select rating from(select rating,avg(age) from sailors group by rating)where age=select min(avg(age) from sailors group by rating); 
+  
